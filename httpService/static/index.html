@@ -1,0 +1,256 @@
+<html>
+    <head>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css"/>
+    <style>
+        .btn-file {
+        position: relative;
+        overflow: hidden;
+        }
+        .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+        }
+        #form1 {
+            padding: 20;
+        }
+        #file_loading{
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 9999;
+        }
+        .sk-chase {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        width: 80px;
+        height: 80px;
+        animation: sk-chase 2.5s infinite linear both;
+        }
+
+        .sk-chase-dot {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0; 
+        animation: sk-chase-dot 2.0s infinite ease-in-out both; 
+        }
+
+        .sk-chase-dot:before {
+        content: '';
+        display: block;
+        width: 25%;
+        height: 25%;
+        background-color: black;
+        border-radius: 100%;
+        animation: sk-chase-dot-before 2.0s infinite ease-in-out both; 
+        }
+
+        .sk-chase-dot:nth-child(1) { animation-delay: -1.1s; }
+        .sk-chase-dot:nth-child(2) { animation-delay: -1.0s; }
+        .sk-chase-dot:nth-child(3) { animation-delay: -0.9s; }
+        .sk-chase-dot:nth-child(4) { animation-delay: -0.8s; }
+        .sk-chase-dot:nth-child(5) { animation-delay: -0.7s; }
+        .sk-chase-dot:nth-child(6) { animation-delay: -0.6s; }
+        .sk-chase-dot:nth-child(1):before { animation-delay: -1.1s; }
+        .sk-chase-dot:nth-child(2):before { animation-delay: -1.0s; }
+        .sk-chase-dot:nth-child(3):before { animation-delay: -0.9s; }
+        .sk-chase-dot:nth-child(4):before { animation-delay: -0.8s; }
+        .sk-chase-dot:nth-child(5):before { animation-delay: -0.7s; }
+        .sk-chase-dot:nth-child(6):before { animation-delay: -0.6s; }
+
+        @keyframes sk-chase {
+        100% { transform: rotate(360deg); } 
+        }
+
+        @keyframes sk-chase-dot {
+        80%, 100% { transform: rotate(360deg); } 
+        }
+
+        @keyframes sk-chase-dot-before {
+        50% {
+            transform: scale(0.4); 
+        } 100%, 0% {
+            transform: scale(1.0); 
+        } 
+        }
+    </style>
+    <script src="/static/js/jquery.js"></script>
+    <script>
+        function readURL(input) {
+        var trs;
+        for(var i =0; i< input.files.length; i++){
+            if (input.files[i]) {
+                var reader = new FileReader();
+                var that = input.files[i];
+                reader.fileName = input.files[i].name;
+                reader.size = input.files[i].size;
+                reader.onload = function (e) {
+                    console.log('=====e===========',that);
+                    imag = e.target.result; 
+                    var trs = '<tr class="template-upload fade in">'+
+                        '        <td>'+
+                        '            <span class="preview"><img width="80" height="44" src="'+getFileIcon(e.target.fileName)+'"></span>'+
+                        '        </td>'+
+                        '        <td>'+
+                        '            <p class="name">'+e.target.fileName+'</p>'+
+                        '        </td>'+
+                        '        <td>'+
+                        '            <p class="size">'+getFileSize(e.target.size)+'</p>'+
+                        '        </td>'+
+                        '    </tr>';
+                    $('#myTable').append(trs);
+                    
+                }
+                reader.readAsDataURL(input.files[i]);
+            }
+        }    
+    }
+    $( document ).ready(function() {
+        $("#imgInp").change(function(){
+            removeAll();
+            readURL(this);
+        });
+    });
+    function removeAll(){
+        $('#myTable tr').remove();
+    }
+
+    function uploadAll() {
+        var files = $('#imgInp').prop('files'); //多个
+        // var files = $('#avatar')[0].files[0] //单个
+        if (files.length == 0) return;
+        showLoading();
+        var data = new FormData();
+        for(var i =0; i< files.length; i++) {
+            data.append('file', files[i]);
+        }
+        $.ajax({
+            url: '/upload',
+            type: 'POST',
+            data: data,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function(data) {
+                hideLoading();
+                window.location.reload();
+            },
+            error: function(params) {
+                hideLoading();
+            }
+        });
+    }
+
+    function getFileSize(size) {
+        if (size < 1024) {
+            return size + " B"
+        }
+        var kb = Number(Math.round(size/1024+'e2')+'e-2');
+        if (kb < 1024) {
+            return kb + " KB";
+        }
+        var mb = Number(Math.round(kb/1024+'e2')+'e-2');
+        if (mb < 1024) {
+            return mb + " MB";
+        }
+        var gb = Number(Math.round(mb/1024+'e2')+'e-2');
+        if (gb < 1024) {
+            return gb + " GB";
+        }
+        var tb = Number(Math.round(gb/1024+'e2')+'e-2');
+        return tb + " TB";
+    }
+
+    var icons = {
+        "jpg"   :"/static/img/file_image.svg",
+        "jpeg"  :"/static/img/file_image.svg",
+        "png"   :"/static/img/file_image.svg",
+        "webp"  :"/static/img/file_image.svg",
+        "svg"   :"/static/img/file_image.svg",
+        "swf"   :"/static/img/file_swf.svg",
+        "mp3"   :"/static/img/file_mp3.svg",
+        "zip"   :"/static/img/file_zip.svg",
+        "exe"   :"/static/img/file_exe.svg",
+        "pdf"   :"/static/img/file_pdf.svg",
+        "doc"   :"/static/img/file_dox.svg",
+        "docx"  :"/static/img/file_dox.svg",
+        "avi"   :"/static/img/file_avi.svg",
+        "mp4"   :"/static/img/file_avi.mp4",
+        "txt"   :"/static/img/file_txt.svg",
+        "xls"   :"/static/img/file_xls.svg",
+        "xlsx"  :"/static/img/file_xls.svg",
+        "gif"   :"/static/img/file_gif.svg",
+        "ppt"   :"/static/img/file_ppt.svg",
+        "pptx"  :"/static/img/file_ppt.svg",
+        "ipa"   :"/static/img/file_ios.svg",
+        "dmg"   :"/static/img/file_ios.svg",
+        "html"  :"/static/img/file_html.svg",
+        "js"    :"/static/img/file_js.svg",
+        "css"   :"/static/img/file_css.svg",
+        "rar"   :"/static/img/file_rar.svg",
+    }
+    function getFileIcon(fileName) {
+        var index = fileName.lastIndexOf(".") + 1;
+        var suffix = "";
+        if (index < fileName.length) {
+            suffix = fileName.substring(index);
+        }
+        suffix = suffix.toLowerCase();
+        var icon = icons[suffix];
+        if (icon != undefined) return icon;
+        return "/static/img/file_unknown.svg"
+    }
+    function showLoading() {
+        $("#file_loading").show();
+    }
+    function hideLoading() {
+        $("#file_loading").hide();
+    }
+    </script>
+    </head>
+    <body>
+    <form id="form1">
+        <span class="btn btn-success  btn-file">
+            <span>Add files...</span>
+            <input type='file' id="imgInp" multiple='true'/>
+        </span>
+        
+        <a type="submit" class="btn btn-primary start" onclick="uploadAll();">
+            <span>Start upload</span>
+        </a>
+        <a type="reset" class="btn btn-warning cancel" onclick="removeAll();">
+            <span>Cancel upload</span>
+        </a>
+        <table id="myTable" class="table table-striped table-hover">
+        </table>
+    </form>
+    <!-- loading -->
+    <div id = "file_loading">
+        <div class="sk-chase">
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+          </div>
+    </div>
+    </body>
+</html>

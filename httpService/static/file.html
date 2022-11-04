@@ -1,0 +1,112 @@
+<html>
+    <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css"/>
+    <style>
+        .btn-file {
+        position: relative;
+        overflow: hidden;
+        }
+        .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+        }
+    </style>
+    <script src="/static/js/jquery.js"></script>
+    </head>
+    <body>
+        <table id="myTable" class="table table-striped table-hover">
+        </table>
+    </body>
+    <script>
+        function showFiles(files) {
+        var trs;
+        for(var i =0; i< files.length; i++){
+            var file = files[i];
+            var fileTypeIcon = getFileIcon(file.fileName);
+            var trs = '<tr class="template-upload fade in">'+
+                '        <td>'+
+                '            <span class="preview"><img width="40" height="44" src="'+fileTypeIcon+'"></span>'+
+                '        </td>'+
+                '        <td>'+
+                '            <p class="name">'+file.fileName+'</p>'+
+                '        </td>'+
+                '        <td>'+
+                '            <p class="name">'+file.filePath+'</p>'+
+                '        </td>'+
+                '        <td>'+
+                '            <p class="name">'+file.size+'</p>'+
+                '        </td>'+
+                '        <td>'+
+                '            <p class="name">'+file.updateTime+'</p>'+
+                '        </td>'+
+                '        <td>'+
+                '            '+
+                '                <a class="btn btn-primary start" target="_blank" href="'+file.downloadUrl+'">'+
+                '                    <span>download</span>'+
+                '                </a>'+
+                '            '+
+                '        </td>'+
+                '    </tr>';
+            $('#myTable').append(trs);
+        }    
+    }
+    var icons = {
+        "jpg"   :"/static/img/file_image.svg",
+        "jpeg"  :"/static/img/file_image.svg",
+        "png"   :"/static/img/file_image.svg",
+        "webp"  :"/static/img/file_image.svg",
+        "svg"   :"/static/img/file_image.svg",
+        "swf"   :"/static/img/file_swf.svg",
+        "mp3"   :"/static/img/file_mp3.svg",
+        "zip"   :"/static/img/file_zip.svg",
+        "exe"   :"/static/img/file_exe.svg",
+        "pdf"   :"/static/img/file_pdf.svg",
+        "doc"   :"/static/img/file_dox.svg",
+        "docx"  :"/static/img/file_dox.svg",
+        "avi"   :"/static/img/file_avi.svg",
+        "mp4"   :"/static/img/file_avi.mp4",
+        "txt"   :"/static/img/file_txt.svg",
+        "xls"   :"/static/img/file_xls.svg",
+        "xlsx"  :"/static/img/file_xls.svg",
+        "gif"   :"/static/img/file_gif.svg",
+        "ppt"   :"/static/img/file_ppt.svg",
+        "pptx"  :"/static/img/file_ppt.svg",
+        "ipa"   :"/static/img/file_ios.svg",
+        "dmg"   :"/static/img/file_ios.svg",
+        "html"  :"/static/img/file_html.svg",
+        "js"    :"/static/img/file_js.svg",
+        "css"   :"/static/img/file_css.svg",
+        "rar"   :"/static/img/file_rar.svg",
+    }
+    function getFileIcon(fileName) {
+        var index = fileName.lastIndexOf(".") + 1;
+        var suffix = "";
+        if (index < fileName.length) {
+            suffix = fileName.substring(index);
+        }
+        suffix = suffix.toLowerCase();
+        var icon = icons[suffix];
+        if (icon != undefined) return icon;
+        return "/static/img/file_unknown.svg"
+    }
+
+    $.get(
+        "/file/fetch",
+        function(data) {
+            showFiles(data);
+        }
+    )
+    </script>
+</html>
